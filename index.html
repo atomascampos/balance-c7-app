@@ -7,6 +7,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes"/>
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>
 <meta name="apple-mobile-web-app-title" content="Balance"/>
+<meta name="format-detection" content="telephone=no,date=no,address=no,email=no,url=no"/>
 <link rel="manifest" href="manifest.json"/>
 <link rel="apple-touch-icon" href="apple-touch-icon.png"/>
 <title>Balance</title>
@@ -182,7 +183,7 @@ label{display:block;font-size:12px;color:var(--text2);margin:12px 0 4px}
 
   <div id="page-foods" class="page">
     <div class="db-search-wrap">
-      <input type="text" id="db-search" placeholder="Search foods…" oninput="renderFoods()">
+      <input type="text" id="db-search" placeholder="Search foods…" oninput="renderFoods()" autocomplete="off">
       <button class="db-add-btn" onclick="openAddFood(null)">
         <svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
       </button>
@@ -215,7 +216,7 @@ label{display:block;font-size:12px;color:var(--text2);margin:12px 0 4px}
   <div id="mm-step1" style="display:flex;flex-direction:column;flex:1;min-height:0">
     <div class="modal-title" style="margin-bottom:10px">Log food</div>
     <label style="margin-top:0">Meal</label>
-    <select id="mm-meal" style="margin-bottom:8px"><option>Breakfast</option><option>Lunch</option><option>Dinner</option><option>Snack</option></select>
+    <select autocomplete="off" id="mm-meal" style="margin-bottom:8px"><option>Breakfast</option><option>Lunch</option><option>Dinner</option><option>Snack</option></select>
     <label style="margin-top:4px">Search food</label>
     <input type="text" id="mm-search" placeholder="Type to filter…" oninput="mmSearch()" autocomplete="off" style="margin-bottom:8px">
     <div class="food-list-scroll" id="mm-list" style="flex:1;min-height:120px;overflow-y:auto"></div>
@@ -236,7 +237,7 @@ label{display:block;font-size:12px;color:var(--text2);margin:12px 0 4px}
     </div>
     <div class="two-col" style="margin-bottom:8px">
       <div><label style="margin-top:0">Quantity</label><input type="number" id="mm-qty" placeholder="100" min="1" oninput="updatePreview()" inputmode="decimal" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"></div>
-      <div><label style="margin-top:0">Unit</label><select id="mm-unit" onchange="updatePreview()"><option value="g">g</option><option value="ml">ml</option></select></div>
+      <div><label style="margin-top:0">Unit</label><select autocomplete="off" id="mm-unit" onchange="updatePreview()"><option value="g">g</option><option value="ml">ml</option></select></div>
     </div>
     <div class="preview-box" id="mm-preview" style="margin-bottom:8px"></div>
     <!-- Portion helper — collapsible to save space -->
@@ -246,7 +247,7 @@ label{display:block;font-size:12px;color:var(--text2);margin:12px 0 4px}
     <div id="portion-helper" style="display:none;background:var(--surface2);border-radius:8px;padding:10px 12px;border:0.5px solid var(--border);margin-bottom:8px">
       <div style="font-size:11px;font-weight:600;color:var(--text3);letter-spacing:0.05em;text-transform:uppercase;margin-bottom:6px">PORTION HELPER</div>
       <div style="display:flex;gap:8px">
-        <input type="text" id="ai-desc" placeholder="e.g. two palm-sized steaks…" style="flex:1">
+        <input type="text" id="ai-desc" placeholder="e.g. two palm-sized steaks…" style="flex:1" autocomplete="off">
         <button class="ai-btn" onclick="estimateQty()">Estimate</button>
       </div>
       <div class="ai-result" id="ai-result" style="margin-top:6px"></div>
@@ -267,7 +268,7 @@ label{display:block;font-size:12px;color:var(--text2);margin:12px 0 4px}
 <div class="modal">
   <div class="modal-title">Log activity</div>
   <label>What did you do?</label>
-  <input type="text" id="act-desc" placeholder="e.g. 45 min run, cycling…">
+  <input type="text" id="act-desc" placeholder="e.g. 45 min run, cycling…" autocomplete="off">
   <label>Kilocalories burnt</label>
   <input type="number" id="act-kcal" placeholder="e.g. 320" min="1" autocomplete="off" inputmode="decimal">
   <div class="btn-row">
@@ -282,13 +283,13 @@ label{display:block;font-size:12px;color:var(--text2);margin:12px 0 4px}
 <div class="modal">
   <div class="modal-title">Add food to database</div>
   <label>Food name</label>
-  <input type="text" id="af-name" placeholder="e.g. Activia strawberry yogurt">
+  <input type="text" id="af-name" placeholder="e.g. Activia strawberry yogurt" autocomplete="off">
   <div class="two-col">
-    <div><label>Kcal per 100g/ml</label><input type="number" id="af-kcal" placeholder="65" min="0"></div>
-    <div><label>Protein per 100g/ml (g)</label><input type="number" id="af-prot" placeholder="5.5" min="0" step="0.1"></div>
+    <div><label>Kcal per 100g/ml</label><input type="number" id="af-kcal" placeholder="65" min="0" autocomplete="off"></div>
+    <div><label>Protein per 100g/ml (g)</label><input type="number" id="af-prot" placeholder="5.5" min="0" step="0.1" autocomplete="off"></div>
   </div>
   <label>Default unit</label>
-  <select id="af-unit"><option value="g">Grams (g)</option><option value="ml">Millilitres (ml)</option></select>
+  <select autocomplete="off" id="af-unit"><option value="g">Grams (g)</option><option value="ml">Millilitres (ml)</option></select>
   <div class="btn-row">
     <button class="btn" onclick="closeModal('addfood-modal')">Cancel</button>
     <button class="btn btn-primary" onclick="saveFood()">Add food</button>
@@ -300,15 +301,15 @@ label{display:block;font-size:12px;color:var(--text2);margin:12px 0 4px}
 <div class="modal-bg" id="editfood-modal" onclick="bgClose(event,'editfood-modal')">
 <div class="modal">
   <div class="modal-title">Edit food</div>
-  <input type="hidden" id="ef-idx">
+  <input type="hidden" id="ef-idx" autocomplete="off">
   <label>Food name</label>
-  <input type="text" id="ef-name">
+  <input type="text" id="ef-name" autocomplete="off">
   <div class="two-col">
-    <div><label>Kcal per 100g/ml</label><input type="number" id="ef-kcal" min="0"></div>
-    <div><label>Protein per 100g/ml (g)</label><input type="number" id="ef-prot" min="0" step="0.1"></div>
+    <div><label>Kcal per 100g/ml</label><input type="number" id="ef-kcal" min="0" autocomplete="off"></div>
+    <div><label>Protein per 100g/ml (g)</label><input type="number" id="ef-prot" min="0" step="0.1" autocomplete="off"></div>
   </div>
   <label>Unit</label>
-  <select id="ef-unit"><option value="g">Grams (g)</option><option value="ml">Millilitres (ml)</option></select>
+  <select autocomplete="off" id="ef-unit"><option value="g">Grams (g)</option><option value="ml">Millilitres (ml)</option></select>
   <div class="btn-row">
     <button class="btn" style="color:var(--red);border-color:var(--red)" onclick="deleteCustomFood()">Delete</button>
     <button class="btn btn-primary" onclick="saveEditFood()">Save</button>
@@ -322,9 +323,9 @@ label{display:block;font-size:12px;color:var(--text2);margin:12px 0 4px}
 <div class="modal">
   <div class="modal-title">Daily goals</div>
   <label>Kilocalorie target</label>
-  <input type="number" id="s-kcal" placeholder="e.g. 2000" min="500">
+  <input type="number" id="s-kcal" placeholder="e.g. 2000" min="500" autocomplete="off">
   <label>Protein target (g)</label>
-  <input type="number" id="s-prot" placeholder="e.g. 150" min="10">
+  <input type="number" id="s-prot" placeholder="e.g. 150" min="10" autocomplete="off">
   <div class="btn-row">
     <button class="btn" onclick="closeModal('settings-modal')">Cancel</button>
     <button class="btn btn-primary" onclick="saveSettings()">Save goals</button>
@@ -506,14 +507,21 @@ function renderHistory(){
 // ---- Foods DB ----
 function renderFoods(){
   let q=(document.getElementById('db-search')||{}).value||'';
-  let foods=allFoods().filter(f=>!q||f.n.toLowerCase().includes(q.toLowerCase()));
-  let allF=allFoods();
-  document.getElementById('food-db').innerHTML=foods.length
-    ?'<div class="food-card">'+foods.map(f=>{
-        let gi=allF.indexOf(f);
-        let isCustom=gi>=FOODS_DEFAULT.length;
-        let ci=isCustom?gi-FOODS_DEFAULT.length:-1;
-        return '<div class="food-row"><div><span class="food-name">'+f.n+'</span>'+(isCustom?'<span style="font-size:10px;background:var(--green-lt);color:var(--green-dk);padding:1px 6px;border-radius:4px;margin-left:6px;vertical-align:middle">custom</span>':'')+'<br><span class="food-macros">'+f.k+' kcal · '+f.p+'g / 100'+f.u+'</span></div>'+(isCustom?'<button onclick="editFood('+ci+')" style="background:none;border:none;color:var(--text3);font-size:12px;cursor:pointer;font-family:inherit;padding:4px 8px;flex-shrink:0">Edit</button>':'')+'</div>';
+  let d=getData();
+  let custom=d.custom||[];
+  // Build list with source tracking — never use indexOf across separate array calls
+  let all=[
+    ...FOODS_DEFAULT.map(f=>({f,isCustom:false,ci:-1})),
+    ...custom.map((f,ci)=>({f,isCustom:true,ci}))
+  ];
+  let filtered=q?all.filter(({f})=>f.n.toLowerCase().includes(q.toLowerCase())):all;
+  document.getElementById('food-db').innerHTML=filtered.length
+    ?'<div class="food-card">'+filtered.map(({f,isCustom,ci})=>{
+        return '<div class="food-row" style="align-items:center"><div style="flex:1"><span class="food-name">'+f.n+'</span>'
+          +(isCustom?'<span style="font-size:10px;background:var(--green-lt);color:var(--green-dk);padding:1px 6px;border-radius:4px;margin-left:6px;vertical-align:middle">custom</span>':'')
+          +'<br><span class="food-macros">'+f.k+' kcal · '+f.p+'g / 100'+f.u+'</span></div>'
+          +(isCustom?'<button onclick="editFood('+ci+')" style="background:none;border:none;color:var(--blue);font-size:13px;font-weight:500;cursor:pointer;font-family:inherit;padding:6px 10px;flex-shrink:0;border:0.5px solid var(--border);border-radius:6px">Edit</button>':'')
+          +'</div>';
       }).join('')+'</div>'
     :'<div class="empty">No foods found.</div>';
 }
