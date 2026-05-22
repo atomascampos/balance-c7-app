@@ -140,7 +140,7 @@ label{display:block;font-size:12px;color:var(--text2);margin:12px 0 4px}
 <div id="app">
 <div class="topbar">
   <div class="topbar-row1">
-    <div class="topbar-left"><h1>balance</h1><div style="font-size:9px;opacity:0.4;letter-spacing:0.05em">v11</div></div>
+    <div class="topbar-left"><h1>balance</h1><div style="font-size:9px;opacity:0.4;letter-spacing:0.05em">v12</div></div>
     <button class="goals-btn" onclick="openSettings()">
       <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M12 2v2m0 16v2M4.93 4.93l1.41 1.41m11.32 11.32 1.41 1.41M2 12h2m16 0h2M4.93 19.07l1.41-1.41M18.66 6.34l-1.41 1.41"/></svg>
       Goals
@@ -602,7 +602,15 @@ function mmPick(btn){
 
 function togglePortionHelper(){
   let el=document.getElementById('portion-helper');
-  el.style.display=el.style.display==='none'?'block':'none';
+  let isHidden=el.style.display==='none'||el.style.display==='';
+  el.style.display=isHidden?'block':'none';
+  if(isHidden){
+    // Focus input immediately so keyboard stays up and user can type straight away
+    setTimeout(()=>{
+      let inp=document.getElementById('ai-desc');
+      if(inp){inp.focus();}
+    },50);
+  }
 }
 function mmBack(){
   _selFood=null;
