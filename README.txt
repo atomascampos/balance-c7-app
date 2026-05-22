@@ -249,6 +249,13 @@ v13.4
   - Smooth slide animation when switching tabs — screens now visually drag
     left or right instead of snapping instantly
 
+
+v13.5
+  - Keyboard offset increased from 60px to 80px to fully clear Chrome autofill bar
+  - modal-actions class (sticky button row) now applied to ALL modals:
+    meal logging, activity, add food, edit food, settings
+  - Cancel/Save/Add buttons now always visible above keyboard in every modal
+
 ================================================================================
 END OF README
 ================================================================================

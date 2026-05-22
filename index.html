@@ -132,15 +132,15 @@ label{display:block;font-size:12px;color:var(--text2);margin:12px 0 4px}
 .two-col{display:grid;grid-template-columns:1fr 1fr;gap:10px}
 .empty{text-align:center;padding:28px 16px;color:var(--text3);font-size:13px}
 .del-btn{background:none;border:none;color:var(--text3);font-size:20px;cursor:pointer;padding:2px 6px;line-height:1;flex-shrink:0}
-.modal-actions{position:sticky;bottom:0;padding:8px 0 0;background:var(--surface);z-index:10}
-.kb-open .modal-actions{padding-bottom:60px}
+.modal-actions{position:sticky;bottom:0;padding:8px 0 4px;background:var(--surface);z-index:10;margin-top:8px}
+.kb-open .modal-actions{padding-bottom:80px}
 </style>
 </head>
 <body>
 <div id="app">
 <div class="topbar">
   <div class="topbar-row1">
-    <div class="topbar-left"><h1>balance</h1><div style="font-size:9px;opacity:0.4;letter-spacing:0.05em">v13.4</div></div>
+    <div class="topbar-left"><h1>balance</h1><div style="font-size:9px;opacity:0.4;letter-spacing:0.05em">v13.5</div></div>
     <button class="goals-btn" onclick="openSettings()">
       <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M12 2v2m0 16v2M4.93 4.93l1.41 1.41m11.32 11.32 1.41 1.41M2 12h2m16 0h2M4.93 19.07l1.41-1.41M18.66 6.34l-1.41 1.41"/></svg>
       Goals
@@ -313,10 +313,10 @@ label{display:block;font-size:12px;color:var(--text2);margin:12px 0 4px}
   </div>
   <label>Default unit</label>
   <select autocomplete="off" id="af-unit"><option value="g">Grams (g)</option><option value="ml">Millilitres (ml)</option></select>
-  <div class="btn-row">
+  <div class="modal-actions"><div class="btn-row" style="margin-top:0">
     <button class="btn" onclick="closeModal('addfood-modal')">Cancel</button>
     <button class="btn btn-primary" onclick="saveFood()">Add food</button>
-  </div>
+  </div></div>
 </div>
 </div>
 
@@ -333,11 +333,12 @@ label{display:block;font-size:12px;color:var(--text2);margin:12px 0 4px}
   </div>
   <label>Unit</label>
   <select autocomplete="off" id="ef-unit"><option value="g">Grams (g)</option><option value="ml">Millilitres (ml)</option></select>
-  <div class="btn-row">
+  <div class="modal-actions"><div class="btn-row" style="margin-top:0">
     <button class="btn" style="color:var(--red);border-color:var(--red)" onclick="deleteCustomFood()">Delete</button>
     <button class="btn btn-primary" onclick="saveEditFood()">Save</button>
   </div>
   <button class="btn" style="width:100%;margin-top:8px" onclick="closeModal('editfood-modal')">Cancel</button>
+  </div>
 </div>
 </div>
 
@@ -349,10 +350,10 @@ label{display:block;font-size:12px;color:var(--text2);margin:12px 0 4px}
   <input type="number" id="s-kcal" placeholder="e.g. 2000" min="500" autocomplete="off">
   <label>Protein target (g)</label>
   <input type="number" id="s-prot" placeholder="e.g. 150" min="10" autocomplete="off">
-  <div class="btn-row">
+  <div class="modal-actions"><div class="btn-row" style="margin-top:0">
     <button class="btn" onclick="closeModal('settings-modal')">Cancel</button>
     <button class="btn btn-primary" onclick="saveSettings()">Save goals</button>
-  </div>
+  </div></div>
 </div>
 </div>
 
