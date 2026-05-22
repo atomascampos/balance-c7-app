@@ -168,12 +168,14 @@ label{display:block;font-size:12px;color:var(--text2);margin:12px 0 4px}
   <div id="page-history" class="page">
     <div class="chart-legend">
       <span class="legend-item"><span class="legend-dot" style="background:#1D9E75"></span>Kcal eaten</span>
-      <span class="legend-item"><span class="legend-dot" style="background:#E24B4A"></span>Kcal burned</span>
+      <span class="legend-item"><span class="legend-dot" style="background:#E24B4A"></span>Kcal burnt</span>
       <span class="legend-item"><span class="legend-dot" style="background:#185FA5"></span>Protein (g)</span>
     </div>
     <div style="position:relative;width:100%;height:190px;margin-bottom:18px">
       <canvas id="histChart"></canvas>
     </div>
+    <div class="section-label">7-day averages</div>
+    <div id="hist-averages"></div>
     <div class="section-label">Daily breakdown</div>
     <div id="hist-list"></div>
   </div>
@@ -207,45 +209,56 @@ label{display:block;font-size:12px;color:var(--text2);margin:12px 0 4px}
 
 <!-- Meal modal -->
 <div class="modal-bg" id="meal-modal" onclick="bgClose(event,'meal-modal')">
-<div class="modal">
-  <div class="modal-title">Log food</div>
-  <label>Meal</label>
-  <select id="mm-meal"><option>Breakfast</option><option>Lunch</option><option>Dinner</option><option>Snack</option></select>
+<div class="modal" id="meal-modal-inner" style="padding:16px 16px 16px;display:flex;flex-direction:column;max-height:85vh">
 
-  <div id="mm-step1">
-    <label>Search food</label>
-    <input type="text" id="mm-search" placeholder="e.g. chicken, milk…" oninput="mmSearch()" autocomplete="off">
-    <div class="food-list-scroll" id="mm-list" style="margin-top:8px"></div>
-    <div style="margin-top:8px;font-size:12px;color:var(--text3)">
+  <!-- Step 1: search + list -->
+  <div id="mm-step1" style="display:flex;flex-direction:column;flex:1;min-height:0">
+    <div class="modal-title" style="margin-bottom:10px">Log food</div>
+    <label style="margin-top:0">Meal</label>
+    <select id="mm-meal" style="margin-bottom:8px"><option>Breakfast</option><option>Lunch</option><option>Dinner</option><option>Snack</option></select>
+    <label style="margin-top:4px">Search food</label>
+    <input type="text" id="mm-search" placeholder="Type to filter…" oninput="mmSearch()" autocomplete="off" style="margin-bottom:8px">
+    <div class="food-list-scroll" id="mm-list" style="flex:1;min-height:120px;overflow-y:auto"></div>
+    <div style="font-size:12px;color:var(--text3);padding:8px 0 4px">
       Not listed? <button style="background:none;border:none;color:var(--green);font-size:12px;cursor:pointer;font-family:inherit;padding:0" onclick="openAddFood('log')">Add new food</button>
+    </div>
+    <div class="btn-row" style="margin-top:4px">
+      <button class="btn" onclick="closeModal('meal-modal')">Cancel</button>
     </div>
   </div>
 
-  <div id="mm-step2" style="display:none">
-    <div class="selected-food-box">
+  <!-- Step 2: quantity entry — compact so it stays above keyboard -->
+  <div id="mm-step2" style="display:none;flex-direction:column">
+    <div class="modal-title" style="margin-bottom:8px">How much?</div>
+    <div class="selected-food-box" style="margin-bottom:10px">
       <div class="selected-food-name" id="mm-sel-name"></div>
       <div class="selected-food-info" id="mm-sel-info"></div>
     </div>
-    <div class="two-col">
-      <div><label>Quantity</label><input type="number" id="mm-qty" placeholder="100" min="1" oninput="updatePreview()"></div>
-      <div><label>Unit</label><select id="mm-unit" onchange="updatePreview()"><option value="g">g</option><option value="ml">ml</option></select></div>
+    <div class="two-col" style="margin-bottom:8px">
+      <div><label style="margin-top:0">Quantity</label><input type="number" id="mm-qty" placeholder="100" min="1" oninput="updatePreview()" inputmode="decimal"></div>
+      <div><label style="margin-top:0">Unit</label><select id="mm-unit" onchange="updatePreview()"><option value="g">g</option><option value="ml">ml</option></select></div>
     </div>
-    <div class="preview-box" id="mm-preview"></div>
-    <div class="ai-box">
-      <div class="ai-box-title">Not sure of the quantity? <span>AI ESTIMATE</span></div>
-      <div class="ai-input-row">
-        <input type="text" id="ai-desc" placeholder="e.g. two palm-sized steaks…">
-        <button class="ai-btn" id="ai-btn" onclick="estimateQty()">Estimate</button>
+    <div class="preview-box" id="mm-preview" style="margin-bottom:8px"></div>
+    <!-- Portion helper — collapsible to save space -->
+    <div id="portion-toggle" style="font-size:12px;color:var(--text3);margin-bottom:6px">
+      Not sure? <button style="background:none;border:none;color:var(--green);font-size:12px;cursor:pointer;font-family:inherit;padding:0" onclick="togglePortionHelper()">Describe your portion</button>
+    </div>
+    <div id="portion-helper" style="display:none;background:var(--surface2);border-radius:8px;padding:10px 12px;border:0.5px solid var(--border);margin-bottom:8px">
+      <div style="font-size:11px;font-weight:600;color:var(--text3);letter-spacing:0.05em;text-transform:uppercase;margin-bottom:6px">PORTION HELPER</div>
+      <div style="display:flex;gap:8px">
+        <input type="text" id="ai-desc" placeholder="e.g. two palm-sized steaks…" style="flex:1">
+        <button class="ai-btn" onclick="estimateQty()">Estimate</button>
       </div>
-      <div class="ai-result" id="ai-result"></div>
+      <div class="ai-result" id="ai-result" style="margin-top:6px"></div>
     </div>
-    <button style="background:none;border:none;color:var(--text3);font-size:12px;cursor:pointer;font-family:inherit;padding:6px 0;margin-top:4px;display:block" onclick="mmBack()">← Search again</button>
+    <button style="background:none;border:none;color:var(--text3);font-size:12px;cursor:pointer;font-family:inherit;padding:4px 0;display:block;margin-bottom:8px" onclick="mmBack()">← Choose a different food</button>
+    <!-- Sticky add button -->
+    <div class="btn-row" style="margin-top:auto">
+      <button class="btn" onclick="closeModal('meal-modal')">Cancel</button>
+      <button class="btn btn-primary" onclick="saveMeal()">Add to log</button>
+    </div>
   </div>
 
-  <div class="btn-row">
-    <button class="btn" onclick="closeModal('meal-modal')">Cancel</button>
-    <button class="btn btn-primary" onclick="saveMeal()">Add to log</button>
-  </div>
 </div>
 </div>
 
@@ -280,6 +293,27 @@ label{display:block;font-size:12px;color:var(--text2);margin:12px 0 4px}
     <button class="btn" onclick="closeModal('addfood-modal')">Cancel</button>
     <button class="btn btn-primary" onclick="saveFood()">Add food</button>
   </div>
+</div>
+</div>
+
+<!-- Edit food modal -->
+<div class="modal-bg" id="editfood-modal" onclick="bgClose(event,'editfood-modal')">
+<div class="modal">
+  <div class="modal-title">Edit food</div>
+  <input type="hidden" id="ef-idx">
+  <label>Food name</label>
+  <input type="text" id="ef-name">
+  <div class="two-col">
+    <div><label>Kcal per 100g/ml</label><input type="number" id="ef-kcal" min="0"></div>
+    <div><label>Protein per 100g/ml (g)</label><input type="number" id="ef-prot" min="0" step="0.1"></div>
+  </div>
+  <label>Unit</label>
+  <select id="ef-unit"><option value="g">Grams (g)</option><option value="ml">Millilitres (ml)</option></select>
+  <div class="btn-row">
+    <button class="btn" style="color:var(--red);border-color:var(--red)" onclick="deleteCustomFood()">Delete</button>
+    <button class="btn btn-primary" onclick="saveEditFood()">Save</button>
+  </div>
+  <button class="btn" style="width:100%;margin-top:8px" onclick="closeModal('editfood-modal')">Cancel</button>
 </div>
 </div>
 
@@ -345,6 +379,12 @@ const FOODS_DEFAULT=[
   {n:'Croissant',k:406,p:8.5,u:'g'},{n:'Granola',k:450,p:10,u:'g'},
   {n:'Pizza Margherita',k:266,p:11,u:'g'},{n:'Soup (vegetable)',k:35,p:1.5,u:'ml'},
   {n:'Caldo verde',k:65,p:2.5,u:'ml'},{n:'Tofu (firm)',k:76,p:8.0,u:'g'},
+  {n:'Frutos vermelhos (mixed berries)',k:45,p:0.5,u:'g'},
+  {n:'Kiwi',k:61,p:1.0,u:'g'},
+  {n:'Pear',k:60,p:0.4,u:'g'},
+  {n:'Scoop proteína vegan',k:363,p:83,u:'g'},
+  {n:'Couscous (cooked)',k:112,p:3.8,u:'g'},
+  {n:'Noodles de arroz (cooked)',k:130,p:2.3,u:'g'}
 ];
 
 function loadData(){try{return JSON.parse(localStorage.getItem('balance_data')||'{}')}catch(e){return{}}}
@@ -437,7 +477,7 @@ function renderHistory(){
   let kburn=days.map(dt=>{let day=d.days[dt];if(!day)return 0;return Math.round((day.activities||[]).reduce((s,a)=>s+a.kcal,0))});
   let prot=days.map(dt=>{let day=d.days[dt];if(!day)return 0;let t=0;MEALS.forEach(m=>(day.meals[m]||[]).forEach(e=>t+=e.prot));return Math.round(t)});
   if(_hChart){_hChart.destroy();_hChart=null;}
-  _hChart=new Chart(document.getElementById('histChart'),{type:'bar',data:{labels,datasets:[{label:'Kcal in',data:kin,backgroundColor:'#1D9E75',borderRadius:3},{label:'Kcal burned',data:kburn,backgroundColor:'#E24B4A',borderRadius:3},{label:'Protein g',data:prot,backgroundColor:'#185FA5',borderRadius:3}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{ticks:{font:{size:10}}},y:{ticks:{font:{size:10}}}}}});
+  _hChart=new Chart(document.getElementById('histChart'),{type:'bar',data:{labels,datasets:[{label:'Kcal in',data:kin,backgroundColor:'#1D9E75',borderRadius:3},{label:'Kcal burnt',data:kburn,backgroundColor:'#E24B4A',borderRadius:3},{label:'Protein g',data:prot,backgroundColor:'#185FA5',borderRadius:3}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{ticks:{font:{size:10}}},y:{ticks:{font:{size:10}}}}}});
   let html='';
   days.slice().reverse().forEach(dt=>{
     let day=d.days[dt],k=0,p=0,b=0;
@@ -448,6 +488,18 @@ function renderHistory(){
     let pb=d.goals.kcal?Math.min(100,Math.round(b/d.goals.kcal*100)):0;
     html+=`<div class="hist-day"><div class="hist-day-head"><span class="hist-date">${lbl}</span><span class="hist-tag ${k>0?'tag-green':'tag-gray'}">${Math.round(k)} kcal</span></div><div class="hbar-row"><span class="hbar-lbl">Kcal</span><div class="hbar-track"><div class="hbar-fill" style="width:${pk}%;background:#1D9E75"></div></div><span class="hbar-val">${Math.round(k)} / ${d.goals.kcal}</span></div><div class="hbar-row"><span class="hbar-lbl">Protein</span><div class="hbar-track"><div class="hbar-fill" style="width:${pp}%;background:#185FA5"></div></div><span class="hbar-val">${Math.round(p)}g / ${d.goals.prot}g</span></div><div class="hbar-row"><span class="hbar-lbl">Burned</span><div class="hbar-track"><div class="hbar-fill" style="width:${pb}%;background:#E24B4A"></div></div><span class="hbar-val">−${Math.round(b)} kcal</span></div></div>`;
   });
+  // Averages
+  let daysWithData=days.filter(dt=>kin[days.indexOf(dt)]>0||kburn[days.indexOf(dt)]>0||prot[days.indexOf(dt)]>0);
+  let n=daysWithData.length||1;
+  let avgKin=Math.round(kin.reduce((a,b)=>a+b,0)/n);
+  let avgBurn=Math.round(kburn.reduce((a,b)=>a+b,0)/n);
+  let avgProt=Math.round(prot.reduce((a,b)=>a+b,0)/n);
+  document.getElementById('hist-averages').innerHTML=
+    '<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:16px">'+
+    '<div style="background:var(--surface2);border-radius:8px;padding:10px 8px;text-align:center"><div style="font-size:10px;color:var(--text3);text-transform:uppercase;letter-spacing:0.05em;margin-bottom:3px">Avg kcal eaten</div><div style="font-size:18px;font-weight:600;color:#1D9E75">'+avgKin+'</div></div>'+
+    '<div style="background:var(--surface2);border-radius:8px;padding:10px 8px;text-align:center"><div style="font-size:10px;color:var(--text3);text-transform:uppercase;letter-spacing:0.05em;margin-bottom:3px">Avg kcal burnt</div><div style="font-size:18px;font-weight:600;color:#E24B4A">'+avgBurn+'</div></div>'+
+    '<div style="background:var(--surface2);border-radius:8px;padding:10px 8px;text-align:center"><div style="font-size:10px;color:var(--text3);text-transform:uppercase;letter-spacing:0.05em;margin-bottom:3px">Avg protein</div><div style="font-size:18px;font-weight:600;color:#185FA5">'+avgProt+'g</div></div>'+
+    '</div>';
   document.getElementById('hist-list').innerHTML=html||'<div class="empty">No history yet.</div>';
 }
 
@@ -455,8 +507,14 @@ function renderHistory(){
 function renderFoods(){
   let q=(document.getElementById('db-search')||{}).value||'';
   let foods=allFoods().filter(f=>!q||f.n.toLowerCase().includes(q.toLowerCase()));
+  let allF=allFoods();
   document.getElementById('food-db').innerHTML=foods.length
-    ?'<div class="food-card">'+foods.map(f=>`<div class="food-row"><span class="food-name">${f.n}</span><span class="food-macros">${f.k} kcal · ${f.p}g / 100${f.u}</span></div>`).join('')+'</div>'
+    ?'<div class="food-card">'+foods.map(f=>{
+        let gi=allF.indexOf(f);
+        let isCustom=gi>=FOODS_DEFAULT.length;
+        let ci=isCustom?gi-FOODS_DEFAULT.length:-1;
+        return '<div class="food-row"><div><span class="food-name">'+f.n+'</span>'+(isCustom?'<span style="font-size:10px;background:var(--green-lt);color:var(--green-dk);padding:1px 6px;border-radius:4px;margin-left:6px;vertical-align:middle">custom</span>':'')+'<br><span class="food-macros">'+f.k+' kcal · '+f.p+'g / 100'+f.u+'</span></div>'+(isCustom?'<button onclick="editFood('+ci+')" style="background:none;border:none;color:var(--text3);font-size:12px;cursor:pointer;font-family:inherit;padding:4px 8px;flex-shrink:0">Edit</button>':'')+'</div>';
+      }).join('')+'</div>'
     :'<div class="empty">No foods found.</div>';
 }
 
@@ -473,7 +531,7 @@ function openMealModal(meal){
   document.getElementById('mm-preview').style.display='none';
   document.getElementById('ai-desc').value='';
   document.getElementById('ai-result').style.display='none';
-  document.getElementById('mm-step1').style.display='block';
+  document.getElementById('mm-step1').style.display='flex';
   document.getElementById('mm-step2').style.display='none';
   mmRenderList('');
   openModal('meal-modal');
@@ -512,7 +570,8 @@ function mmPick(btn){
   let u=btn.getAttribute('data-u');
   _selFood={n,k,p,u};
   document.getElementById('mm-step1').style.display='none';
-  document.getElementById('mm-step2').style.display='block';
+  document.getElementById('mm-step2').style.display='flex';
+  document.getElementById('portion-helper').style.display='none';
   document.getElementById('mm-sel-name').textContent=n;
   document.getElementById('mm-sel-info').textContent=k+' kcal · '+p+'g protein per 100'+u;
   document.getElementById('mm-unit').value=u;
@@ -521,10 +580,14 @@ function mmPick(btn){
   setTimeout(()=>document.getElementById('mm-qty').focus(),100);
 }
 
+function togglePortionHelper(){
+  let el=document.getElementById('portion-helper');
+  el.style.display=el.style.display==='none'?'block':'none';
+}
 function mmBack(){
   _selFood=null;
   document.getElementById('mm-step2').style.display='none';
-  document.getElementById('mm-step1').style.display='block';
+  document.getElementById('mm-step1').style.display='flex';
   document.getElementById('mm-search').value='';
   mmRenderList('');
 }
@@ -603,67 +666,114 @@ function deleteActivity(idx){
   saveData(d);renderToday();
 }
 
-// ---- AI estimate ----
+// ---- Portion estimator ----
 function estimateQty(){
   let desc=document.getElementById('ai-desc').value.trim().toLowerCase();
   let res=document.getElementById('ai-result');
   res.className='ai-result';
   if(!desc){alert('Please describe your portion first.');return;}
 
-  let isLiquid=_selFood&&(_selFood.u==='ml'||_selFood.n.toLowerCase().match(/milk|juice|water|coffee|tea|wine|beer|drink|soup|smoothie|oil/));
+  let fname=_selFood?_selFood.n.toLowerCase():'';
+  let isLiquid=_selFood&&(_selFood.u==='ml'||fname.match(/milk|juice|water|coffee|tea|wine|beer|drink|soup|smoothie|oil|yogurt|cream/));
+
+  // Food density map — grams per 250ml-equivalent fist/palm for dense vs light foods
+  // Format: [palm_g, fist_g, handful_g, cup_g] 
+  function densityFor(food){
+    if(food.match(/rice|pasta|grain|oat|lentil|chickpea|bean|couscous|quinoa/)) return {palm:100,fist:180,handful:60,cup:200,tablespoon:18,teaspoon:6};
+    if(food.match(/lettuce|spinach|salad|leaves|kale|herb|rocket/))           return {palm:15,fist:25,handful:10,cup:30,tablespoon:3,teaspoon:1};
+    if(food.match(/flour|sugar|salt|powder|cocoa/))                           return {palm:80,fist:140,handful:45,cup:150,tablespoon:12,teaspoon:4};
+    if(food.match(/nut|almond|walnut|cashew|seed|peanut/))                   return {palm:40,fist:70,handful:30,cup:80,tablespoon:10,teaspoon:3};
+    if(food.match(/cheese|butter|fat/))                                       return {palm:60,fist:100,handful:35,cup:120,tablespoon:15,teaspoon:5};
+    if(food.match(/meat|chicken|beef|pork|lamb|fish|salmon|tuna|steak|breast|fillet|mince/)) return {palm:120,fist:170,handful:60,cup:200,tablespoon:15,teaspoon:5};
+    if(food.match(/fruit|apple|banana|berry|grape|mango|melon/))             return {palm:100,fist:150,handful:50,cup:150,tablespoon:15,teaspoon:5};
+    if(food.match(/vegetable|broccoli|carrot|pepper|tomato|cucumber|potato/)) return {palm:80,fist:130,handful:40,cup:120,tablespoon:12,teaspoon:4};
+    // default
+    return {palm:100,fist:150,handful:40,cup:150,tablespoon:15,teaspoon:5};
+  }
+  let D=densityFor(fname);
 
   function getNum(str){
     let m=str.match(/(\d+\.?\d*)/);
     if(m)return parseFloat(m[1]);
-    let w={'two':2,'three':3,'four':4,'five':5,'six':6,'half':0.5};
+    let w={'two':2,'three':3,'four':4,'five':5,'six':6,'half':0.5,'a half':0.5,'quarter':0.25};
     for(let k in w){if(str.includes(k))return w[k];}
     return 1;
   }
+  let num=getNum(desc);
 
+  // Portions list — sorted longest keyword first to avoid partial matches
   let portions=[
+    // liquids
     {kw:['small glass'],u:'ml',q:150,ex:'A small glass is about 150ml'},
-    {kw:['large glass'],u:'ml',q:350,ex:'A large glass is about 350ml'},
+    {kw:['large glass','big glass'],u:'ml',q:350,ex:'A large glass is about 350ml'},
     {kw:['glass','glasses'],u:'ml',q:250,ex:'A standard glass is about 250ml'},
     {kw:['small bottle'],u:'ml',q:330,ex:'A small bottle is about 330ml'},
+    {kw:['large bottle','big bottle'],u:'ml',q:750,ex:'A large bottle is about 750ml'},
     {kw:['bottle','bottles'],u:'ml',q:500,ex:'A standard bottle is about 500ml'},
     {kw:['can','cans','tin','tins'],u:'ml',q:330,ex:'A can is about 330ml'},
     {kw:['mug','mugs'],u:'ml',q:300,ex:'A mug is about 300ml'},
+    {kw:['small cup','small cups'],u:'ml',q:150,ex:'A small cup is about 150ml'},
     {kw:['cup','cups'],u:'ml',q:240,ex:'A cup is about 240ml'},
     {kw:['shot','shots'],u:'ml',q:35,ex:'A shot is about 35ml'},
-    {kw:['tablespoon','tablespoons','tbsp'],u:'g',q:15,ex:'A tablespoon is about 15g'},
-    {kw:['teaspoon','teaspoons','tsp'],u:'g',q:5,ex:'A teaspoon is about 5g'},
-    {kw:['palm-sized','palm sized','palm'],u:'g',q:120,ex:'A palm-sized portion is about 120g'},
-    {kw:['fist-sized','fist sized','fist'],u:'g',q:150,ex:'A fist-sized portion is about 150g'},
-    {kw:['handful','handfuls'],u:'g',q:40,ex:'A handful is about 40g'},
-    {kw:['thumb','thumbs'],u:'g',q:15,ex:'A thumb-sized amount is about 15g'},
-    {kw:['cupped hand','cupped hands'],u:'g',q:60,ex:'A cupped hand is about 60g'},
+    {kw:['espresso'],u:'ml',q:30,ex:'An espresso is about 30ml'},
+    // spoons
+    {kw:['heaped tablespoon','heaped tbsp'],u:'g',q:D.tablespoon*1.5,ex:'A heaped tablespoon is about '+(D.tablespoon*1.5)+'g'},
+    {kw:['tablespoon','tablespoons','tbsp'],u:'g',q:D.tablespoon,ex:'A tablespoon is about '+D.tablespoon+'g for this food'},
+    {kw:['heaped teaspoon','heaped tsp'],u:'g',q:D.teaspoon*1.5,ex:'A heaped teaspoon is about '+(D.teaspoon*1.5)+'g'},
+    {kw:['teaspoon','teaspoons','tsp'],u:'g',q:D.teaspoon,ex:'A teaspoon is about '+D.teaspoon+'g for this food'},
+    {kw:['dessertspoon','dessertspoons','dsp'],u:'g',q:D.teaspoon*2,ex:'A dessertspoon is about '+(D.teaspoon*2)+'g'},
+    // hands
+    {kw:['palm-sized','palm sized','palm of','palm'],u:'g',q:D.palm,ex:'A palm-sized amount is about '+D.palm+'g for this food'},
+    {kw:['fist-sized','fist sized','fist','closed fist'],u:'g',q:D.fist,ex:'A fist-sized portion is about '+D.fist+'g for this food'},
+    {kw:['cupped hand','cupped hands','cupped'],u:'g',q:Math.round(D.handful*1.5),ex:'A cupped hand is about '+Math.round(D.handful*1.5)+'g'},
+    {kw:['small handful','small handfull'],u:'g',q:Math.round(D.handful*0.7),ex:'A small handful is about '+Math.round(D.handful*0.7)+'g'},
+    {kw:['large handful','big handful'],u:'g',q:Math.round(D.handful*1.5),ex:'A large handful is about '+Math.round(D.handful*1.5)+'g'},
+    {kw:['handful','handfuls','handfull'],u:'g',q:D.handful,ex:'A handful is about '+D.handful+'g for this food'},
+    {kw:['thumb','thumbs','thumb-sized'],u:'g',q:15,ex:'A thumb-sized amount is about 15g'},
+    {kw:['pinch','pinches'],u:'g',q:1,ex:'A pinch is about 1g'},
+    // slices
+    {kw:['thin slice','thin slices'],u:'g',q:20,ex:'A thin slice is about 20g'},
     {kw:['thick slice','thick slices'],u:'g',q:50,ex:'A thick slice is about 50g'},
     {kw:['slice','slices'],u:'g',q:30,ex:'A slice is about 30g'},
-    {kw:['small piece','small pieces'],u:'g',q:60,ex:'A small piece is about 60g'},
-    {kw:['large piece','large pieces'],u:'g',q:150,ex:'A large piece is about 150g'},
-    {kw:['piece','pieces'],u:'g',q:100,ex:'A piece is roughly 100g'},
+    // pieces & portions
+    {kw:['small piece','small pieces','small chunk'],u:'g',q:60,ex:'A small piece is about 60g'},
+    {kw:['large piece','large pieces','large chunk','big piece'],u:'g',q:180,ex:'A large piece is about 180g'},
+    {kw:['piece','pieces','chunk','chunks'],u:'g',q:100,ex:'A piece is roughly 100g'},
     {kw:['small portion','small serving'],u:'g',q:100,ex:'A small portion is about 100g'},
-    {kw:['large portion','large serving'],u:'g',q:220,ex:'A large portion is about 220g'},
+    {kw:['large portion','large serving','big portion'],u:'g',q:250,ex:'A large portion is about 250g'},
     {kw:['portion','portions','serving','servings'],u:'g',q:150,ex:'A standard portion is about 150g'},
+    // bowls & plates
     {kw:['small bowl'],u:'g',q:200,ex:'A small bowl is about 200g'},
-    {kw:['large bowl'],u:'g',q:400,ex:'A large bowl is about 400g'},
+    {kw:['large bowl','big bowl'],u:'g',q:450,ex:'A large bowl is about 450g'},
     {kw:['bowl','bowls'],u:'g',q:300,ex:'A bowl is about 300g'},
+    {kw:['side plate'],u:'g',q:200,ex:'A side plate portion is about 200g'},
     {kw:['plate','plates'],u:'g',q:400,ex:'A plate is about 400g'},
-    {kw:['small steak','small fillet'],u:'g',q:100,ex:'A small steak is about 100g'},
-    {kw:['large steak','large fillet'],u:'g',q:220,ex:'A large steak is about 220g'},
-    {kw:['steak','steaks','fillet','fillets'],u:'g',q:150,ex:'A steak or fillet is about 150g'},
+    // food specific
+    {kw:['small steak'],u:'g',q:120,ex:'A small steak is about 120g'},
+    {kw:['large steak','big steak'],u:'g',q:250,ex:'A large steak is about 250g'},
+    {kw:['steak','steaks'],u:'g',q:180,ex:'A steak is about 180g'},
+    {kw:['small fillet'],u:'g',q:100,ex:'A small fillet is about 100g'},
+    {kw:['large fillet','big fillet'],u:'g',q:200,ex:'A large fillet is about 200g'},
+    {kw:['fillet','fillets'],u:'g',q:150,ex:'A fillet is about 150g'},
+    {kw:['small breast'],u:'g',q:120,ex:'A small chicken breast is about 120g'},
+    {kw:['large breast','big breast'],u:'g',q:200,ex:'A large chicken breast is about 200g'},
     {kw:['breast','breasts'],u:'g',q:150,ex:'A chicken breast is about 150g'},
     {kw:['thigh','thighs'],u:'g',q:120,ex:'A chicken thigh is about 120g'},
+    {kw:['drumstick','drumsticks'],u:'g',q:80,ex:'A drumstick is about 80g'},
     {kw:['small egg','small eggs'],u:'g',q:45,ex:'A small egg is about 45g'},
-    {kw:['large egg','large eggs'],u:'g',q:70,ex:'A large egg is about 70g'},
+    {kw:['large egg','large eggs','big egg'],u:'g',q:70,ex:'A large egg is about 70g'},
     {kw:['egg','eggs'],u:'g',q:60,ex:'One egg is about 60g'},
+    {kw:['small apple','small banana','small fruit'],u:'g',q:80,ex:'A small fruit is about 80g'},
+    {kw:['large apple','large banana','large fruit','big apple','big banana'],u:'g',q:150,ex:'A large fruit is about 150g'},
+    {kw:['medium apple','medium kiwi','medium pear','medium fruit'],u:'g',q:110,ex:'A medium apple/kiwi/pear is about 110g'},
+    {kw:['apple','banana','orange','pear','peach','nectarine','kiwi'],u:'g',q:110,ex:'A medium fruit is about 110g'},
     {kw:['rasher','rashers'],u:'g',q:25,ex:'A rasher is about 25g'},
     {kw:['scoop','scoops'],u:'g',q:30,ex:'A scoop is about 30g'},
     {kw:['bar','bars'],u:'g',q:45,ex:'A bar is about 45g'},
-    {kw:['square','squares'],u:'g',q:10,ex:'A square is about 10g'},
+    {kw:['square','squares'],u:'g',q:10,ex:'A square of chocolate is about 10g'},
+    {kw:['can of','tin of'],u:'g',q:200,ex:'A can/tin is about 200g drained'},
   ];
 
-  let num=getNum(desc);
   let matched=null;
   for(let p of portions){
     for(let kw of p.kw){
@@ -679,7 +789,7 @@ function estimateQty(){
 
   let unit=isLiquid?'ml':matched.u;
   let qty=Math.round(num*matched.q);
-  let ex=num!==1?(num+' x '+matched.ex.toLowerCase()):matched.ex;
+  let ex=num!==1?(num+' × '+matched.ex.toLowerCase()):matched.ex;
 
   res.style.display='block';
   res.textContent='Estimated: '+qty+unit+' — '+ex+'. Tap to use.';
@@ -704,6 +814,39 @@ function saveSettings(){
   let d=getData();d.goals={kcal:k,prot:p};saveData(d);closeModal('settings-modal');renderToday();
 }
 
+function editFood(ci){
+  let d=getData();
+  let f=d.custom[ci];
+  if(!f)return;
+  document.getElementById('ef-idx').value=ci;
+  document.getElementById('ef-name').value=f.n;
+  document.getElementById('ef-kcal').value=f.k;
+  document.getElementById('ef-prot').value=f.p;
+  document.getElementById('ef-unit').value=f.u;
+  openModal('editfood-modal');
+}
+function saveEditFood(){
+  let ci=parseInt(document.getElementById('ef-idx').value);
+  let n=document.getElementById('ef-name').value.trim();
+  let k=parseFloat(document.getElementById('ef-kcal').value);
+  let p=parseFloat(document.getElementById('ef-prot').value);
+  let u=document.getElementById('ef-unit').value;
+  if(!n||isNaN(k)||isNaN(p)){alert('Please fill in all fields.');return;}
+  let d=getData();
+  d.custom[ci]={n,k,p,u};
+  saveData(d);
+  closeModal('editfood-modal');
+  renderFoods();
+}
+function deleteCustomFood(){
+  let ci=parseInt(document.getElementById('ef-idx').value);
+  if(!confirm('Delete this food from your database?'))return;
+  let d=getData();
+  d.custom.splice(ci,1);
+  saveData(d);
+  closeModal('editfood-modal');
+  renderFoods();
+}
 function openModal(id){document.getElementById(id).classList.add('open')}
 function closeModal(id){document.getElementById(id).classList.remove('open')}
 function bgClose(e,id){if(e.target===document.getElementById(id))closeModal(id)}
