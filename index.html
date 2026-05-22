@@ -604,22 +604,91 @@ function deleteActivity(idx){
 }
 
 // ---- AI estimate ----
-async function estimateQty(){
-  let desc=document.getElementById('ai-desc').value.trim();
-  let food=_selFood?_selFood.n:'';
+function estimateQty(){
+  let desc=document.getElementById('ai-desc').value.trim().toLowerCase();
+  let res=document.getElementById('ai-result');
+  res.className='ai-result';
   if(!desc){alert('Please describe your portion first.');return;}
-  let btn=document.getElementById('ai-btn'),res=document.getElementById('ai-result');
-  btn.disabled=true;btn.textContent='…';res.style.display='none';res.className='ai-result';
-  try{
-    const resp=await fetch('https://api.anthropic.com/v1/messages',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:200,system:'Nutrition assistant. Reply ONLY with JSON: {"qty":200,"unit":"g","explanation":"..."}. No markdown.',messages:[{role:'user',content:'Food: '+food+'\nPortion: '+desc}]})});
-    const data=await resp.json();
-    let txt=data.content.map(c=>c.text||'').join('').trim().replace(/```json|```/g,'');
-    let parsed=JSON.parse(txt);
-    res.style.display='block';
-    res.textContent='Estimated: '+parsed.qty+parsed.unit+' — '+parsed.explanation+'. Tap to use.';
-    res.onclick=()=>{document.getElementById('mm-qty').value=parsed.qty;document.getElementById('mm-unit').value=parsed.unit;updatePreview();res.style.display='none';};
-  }catch(e){res.style.display='block';res.className='ai-result error';res.textContent='Could not estimate. Please enter manually.';}
-  btn.disabled=false;btn.textContent='Estimate';
+
+  let isLiquid=_selFood&&(_selFood.u==='ml'||_selFood.n.toLowerCase().match(/milk|juice|water|coffee|tea|wine|beer|drink|soup|smoothie|oil/));
+
+  function getNum(str){
+    let m=str.match(/(\d+\.?\d*)/);
+    if(m)return parseFloat(m[1]);
+    let w={'two':2,'three':3,'four':4,'five':5,'six':6,'half':0.5};
+    for(let k in w){if(str.includes(k))return w[k];}
+    return 1;
+  }
+
+  let portions=[
+    {kw:['small glass'],u:'ml',q:150,ex:'A small glass is about 150ml'},
+    {kw:['large glass'],u:'ml',q:350,ex:'A large glass is about 350ml'},
+    {kw:['glass','glasses'],u:'ml',q:250,ex:'A standard glass is about 250ml'},
+    {kw:['small bottle'],u:'ml',q:330,ex:'A small bottle is about 330ml'},
+    {kw:['bottle','bottles'],u:'ml',q:500,ex:'A standard bottle is about 500ml'},
+    {kw:['can','cans','tin','tins'],u:'ml',q:330,ex:'A can is about 330ml'},
+    {kw:['mug','mugs'],u:'ml',q:300,ex:'A mug is about 300ml'},
+    {kw:['cup','cups'],u:'ml',q:240,ex:'A cup is about 240ml'},
+    {kw:['shot','shots'],u:'ml',q:35,ex:'A shot is about 35ml'},
+    {kw:['tablespoon','tablespoons','tbsp'],u:'g',q:15,ex:'A tablespoon is about 15g'},
+    {kw:['teaspoon','teaspoons','tsp'],u:'g',q:5,ex:'A teaspoon is about 5g'},
+    {kw:['palm-sized','palm sized','palm'],u:'g',q:120,ex:'A palm-sized portion is about 120g'},
+    {kw:['fist-sized','fist sized','fist'],u:'g',q:150,ex:'A fist-sized portion is about 150g'},
+    {kw:['handful','handfuls'],u:'g',q:40,ex:'A handful is about 40g'},
+    {kw:['thumb','thumbs'],u:'g',q:15,ex:'A thumb-sized amount is about 15g'},
+    {kw:['cupped hand','cupped hands'],u:'g',q:60,ex:'A cupped hand is about 60g'},
+    {kw:['thick slice','thick slices'],u:'g',q:50,ex:'A thick slice is about 50g'},
+    {kw:['slice','slices'],u:'g',q:30,ex:'A slice is about 30g'},
+    {kw:['small piece','small pieces'],u:'g',q:60,ex:'A small piece is about 60g'},
+    {kw:['large piece','large pieces'],u:'g',q:150,ex:'A large piece is about 150g'},
+    {kw:['piece','pieces'],u:'g',q:100,ex:'A piece is roughly 100g'},
+    {kw:['small portion','small serving'],u:'g',q:100,ex:'A small portion is about 100g'},
+    {kw:['large portion','large serving'],u:'g',q:220,ex:'A large portion is about 220g'},
+    {kw:['portion','portions','serving','servings'],u:'g',q:150,ex:'A standard portion is about 150g'},
+    {kw:['small bowl'],u:'g',q:200,ex:'A small bowl is about 200g'},
+    {kw:['large bowl'],u:'g',q:400,ex:'A large bowl is about 400g'},
+    {kw:['bowl','bowls'],u:'g',q:300,ex:'A bowl is about 300g'},
+    {kw:['plate','plates'],u:'g',q:400,ex:'A plate is about 400g'},
+    {kw:['small steak','small fillet'],u:'g',q:100,ex:'A small steak is about 100g'},
+    {kw:['large steak','large fillet'],u:'g',q:220,ex:'A large steak is about 220g'},
+    {kw:['steak','steaks','fillet','fillets'],u:'g',q:150,ex:'A steak or fillet is about 150g'},
+    {kw:['breast','breasts'],u:'g',q:150,ex:'A chicken breast is about 150g'},
+    {kw:['thigh','thighs'],u:'g',q:120,ex:'A chicken thigh is about 120g'},
+    {kw:['small egg','small eggs'],u:'g',q:45,ex:'A small egg is about 45g'},
+    {kw:['large egg','large eggs'],u:'g',q:70,ex:'A large egg is about 70g'},
+    {kw:['egg','eggs'],u:'g',q:60,ex:'One egg is about 60g'},
+    {kw:['rasher','rashers'],u:'g',q:25,ex:'A rasher is about 25g'},
+    {kw:['scoop','scoops'],u:'g',q:30,ex:'A scoop is about 30g'},
+    {kw:['bar','bars'],u:'g',q:45,ex:'A bar is about 45g'},
+    {kw:['square','squares'],u:'g',q:10,ex:'A square is about 10g'},
+  ];
+
+  let num=getNum(desc);
+  let matched=null;
+  for(let p of portions){
+    for(let kw of p.kw){
+      if(desc.includes(kw)){matched=p;break;}
+    }
+    if(matched)break;
+  }
+
+  if(!matched){
+    if(isLiquid){matched={u:'ml',q:250,ex:'Assuming a standard glass of 250ml'};}
+    else{matched={u:'g',q:100,ex:'Could not recognise the portion — using 100g as a starting point'};}
+  }
+
+  let unit=isLiquid?'ml':matched.u;
+  let qty=Math.round(num*matched.q);
+  let ex=num!==1?(num+' x '+matched.ex.toLowerCase()):matched.ex;
+
+  res.style.display='block';
+  res.textContent='Estimated: '+qty+unit+' — '+ex+'. Tap to use.';
+  res.onclick=()=>{
+    document.getElementById('mm-qty').value=qty;
+    document.getElementById('mm-unit').value=unit;
+    updatePreview();
+    res.style.display='none';
+  };
 }
 
 // ---- Settings ----
