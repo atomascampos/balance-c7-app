@@ -166,7 +166,9 @@ label{display:block;font-size:12px;color:var(--text2);margin:12px 0 4px}
   </div>
 
   <div id="page-history" class="page">
-    <div class="chart-legend">
+    <div class="section-label" style="margin-top:0">7-day averages</div>
+    <div id="hist-averages"></div>
+    <div class="chart-legend" style="margin-top:14px">
       <span class="legend-item"><span class="legend-dot" style="background:#1D9E75"></span>Kcal eaten</span>
       <span class="legend-item"><span class="legend-dot" style="background:#E24B4A"></span>Kcal burnt</span>
       <span class="legend-item"><span class="legend-dot" style="background:#185FA5"></span>Protein (g)</span>
@@ -174,8 +176,6 @@ label{display:block;font-size:12px;color:var(--text2);margin:12px 0 4px}
     <div style="position:relative;width:100%;height:190px;margin-bottom:18px">
       <canvas id="histChart"></canvas>
     </div>
-    <div class="section-label">7-day averages</div>
-    <div id="hist-averages"></div>
     <div class="section-label">Daily breakdown</div>
     <div id="hist-list"></div>
   </div>
@@ -235,7 +235,7 @@ label{display:block;font-size:12px;color:var(--text2);margin:12px 0 4px}
       <div class="selected-food-info" id="mm-sel-info"></div>
     </div>
     <div class="two-col" style="margin-bottom:8px">
-      <div><label style="margin-top:0">Quantity</label><input type="number" id="mm-qty" placeholder="100" min="1" oninput="updatePreview()" inputmode="decimal"></div>
+      <div><label style="margin-top:0">Quantity</label><input type="number" id="mm-qty" placeholder="100" min="1" oninput="updatePreview()" inputmode="decimal" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"></div>
       <div><label style="margin-top:0">Unit</label><select id="mm-unit" onchange="updatePreview()"><option value="g">g</option><option value="ml">ml</option></select></div>
     </div>
     <div class="preview-box" id="mm-preview" style="margin-bottom:8px"></div>
@@ -268,8 +268,8 @@ label{display:block;font-size:12px;color:var(--text2);margin:12px 0 4px}
   <div class="modal-title">Log activity</div>
   <label>What did you do?</label>
   <input type="text" id="act-desc" placeholder="e.g. 45 min run, cycling…">
-  <label>Kilocalories burned</label>
-  <input type="number" id="act-kcal" placeholder="e.g. 320" min="1">
+  <label>Kilocalories burnt</label>
+  <input type="number" id="act-kcal" placeholder="e.g. 320" min="1" autocomplete="off" inputmode="decimal">
   <div class="btn-row">
     <button class="btn" onclick="closeModal('act-modal')">Cancel</button>
     <button class="btn btn-primary" onclick="saveAct()">Save</button>
@@ -450,7 +450,7 @@ function renderToday(){
     <div class="metric"><div class="metric-label">Kcal eaten</div><div class="metric-val" style="color:${kc}">${Math.round(tk)}</div><div class="metric-label" style="margin-top:2px">of ${gk} kcal</div><div class="bar"><div class="bar-fill" style="width:${Math.min(100,Math.round(tk/gk*100))}%;background:${kc}"></div></div></div>
     <div class="metric"><div class="metric-label">Protein</div><div class="metric-val" style="color:${pc}">${Math.round(tp)}g</div><div class="metric-label" style="margin-top:2px">of ${gp}g</div><div class="bar"><div class="bar-fill" style="width:${Math.min(100,Math.round(tp/gp*100))}%;background:${pc}"></div></div></div>`;
   let nc=net<=gk?'#1D9E75':'#E24B4A';
-  document.getElementById('net-card').innerHTML=`<div><div class="net-label">Net kcal (eaten − burned)</div></div><div class="net-val" style="color:${nc}">${Math.round(net)} kcal</div>`;
+  document.getElementById('net-card').innerHTML=`<div><div class="net-label">Net kcal (eaten − burnt)</div></div><div class="net-val" style="color:${nc}">${Math.round(net)} kcal</div>`;
   let mc='';
   MEALS.forEach(m=>{
     let es=day.meals[m]||[],mk=es.reduce((s,e)=>s+e.kcal,0),mp=es.reduce((s,e)=>s+e.prot,0);
