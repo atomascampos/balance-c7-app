@@ -239,6 +239,16 @@ v13.3
     food database info, backup instructions, and full changelog.
     README will be updated with every future change.
 
+
+v13.4
+  - Average kcal eaten card colour fixed to red, average kcal burnt to green
+  - Activity log modal: Cancel/Save buttons now shift above Chrome autofill bar
+    when keyboard is open (same fix as meal logging modal)
+  - kb-open keyboard detection extended to all modals (activity, add food,
+    edit food, settings)
+  - Smooth slide animation when switching tabs — screens now visually drag
+    left or right instead of snapping instantly
+
 ================================================================================
 END OF README
 ================================================================================
