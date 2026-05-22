@@ -140,13 +140,13 @@ label{display:block;font-size:12px;color:var(--text2);margin:12px 0 4px}
 <div id="app">
 <div class="topbar">
   <div class="topbar-row1">
-    <div class="topbar-left"><h1>balance</h1><div style="font-size:9px;opacity:0.4;letter-spacing:0.05em">v13</div></div>
+    <div class="topbar-left"><h1>balance</h1><div style="font-size:9px;opacity:0.4;letter-spacing:0.05em">v13.3</div></div>
     <button class="goals-btn" onclick="openSettings()">
       <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M12 2v2m0 16v2M4.93 4.93l1.41 1.41m11.32 11.32 1.41 1.41M2 12h2m16 0h2M4.93 19.07l1.41-1.41M18.66 6.34l-1.41 1.41"/></svg>
       Goals
     </button>
   </div>
-  <div class="date-nav">
+  <div class="date-nav" id="date-nav-bar">
     <button class="date-nav-btn" id="prev-day-btn" onclick="changeDay(-1)">‹</button>
     <div class="date-display" id="date-display" onclick="goToToday()"></div>
     <button class="date-nav-btn" id="next-day-btn" onclick="changeDay(1)">›</button>
@@ -169,6 +169,16 @@ label{display:block;font-size:12px;color:var(--text2);margin:12px 0 4px}
   </div>
 
   <div id="page-history" class="page">
+    <div class="section-label" style="margin-top:0">7-day averages</div>
+    <div id="hist-averages"></div>
+    <div class="chart-legend" style="margin-top:14px">
+      <span class="legend-item"><span class="legend-dot" style="background:#E24B4A"></span>Kcal eaten</span>
+      <span class="legend-item"><span class="legend-dot" style="background:#1D9E75"></span>Kcal burnt</span>
+      <span class="legend-item"><span class="legend-dot" style="background:#185FA5"></span>Protein (g)</span>
+    </div>
+    <div style="position:relative;width:100%;height:190px;margin-bottom:18px">
+      <canvas id="histChart"></canvas>
+    </div>
     <div style="display:flex;gap:8px;margin-bottom:14px">
       <button onclick="exportData()" style="flex:1;display:flex;align-items:center;justify-content:center;gap:6px;background:var(--surface);border:0.5px solid var(--border);border-radius:8px;padding:9px 12px;font-size:13px;font-weight:500;color:var(--text);cursor:pointer;font-family:inherit">
         <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
@@ -179,16 +189,6 @@ label{display:block;font-size:12px;color:var(--text2);margin:12px 0 4px}
         Upload data
       </button>
       <input type="file" id="import-input" accept=".json" style="display:none" onchange="importData(event)">
-    </div>
-    <div class="section-label" style="margin-top:0">7-day averages</div>
-    <div id="hist-averages"></div>
-    <div class="chart-legend" style="margin-top:14px">
-      <span class="legend-item"><span class="legend-dot" style="background:#1D9E75"></span>Kcal eaten</span>
-      <span class="legend-item"><span class="legend-dot" style="background:#E24B4A"></span>Kcal burnt</span>
-      <span class="legend-item"><span class="legend-dot" style="background:#185FA5"></span>Protein (g)</span>
-    </div>
-    <div style="position:relative;width:100%;height:190px;margin-bottom:18px">
-      <canvas id="histChart"></canvas>
     </div>
     <div class="section-label">Daily breakdown</div>
     <div id="hist-list"></div>
@@ -456,6 +456,8 @@ function showPage(name,btn){
   document.querySelectorAll('.nav-btn').forEach(b=>b.classList.remove('active'));
   document.getElementById('page-'+name).classList.add('active');
   if(btn)btn.classList.add('active');
+  // Only show date navigator on Today tab
+  document.getElementById('date-nav-bar').style.display=name==='today'?'flex':'none';
   if(name==='today')renderToday();
   if(name==='history')renderHistory();
   if(name==='foods')renderFoods();
@@ -473,7 +475,7 @@ function renderToday(){
   document.getElementById('summary-cards').innerHTML=`
     <div class="metric"><div class="metric-label">Kcal eaten</div><div class="metric-val" style="color:${kc}">${Math.round(tk)}</div><div class="metric-label" style="margin-top:2px">of ${gk} kcal</div><div class="bar"><div class="bar-fill" style="width:${Math.min(100,Math.round(tk/gk*100))}%;background:${kc}"></div></div></div>
     <div class="metric"><div class="metric-label">Protein</div><div class="metric-val" style="color:${pc}">${Math.round(tp)}g</div><div class="metric-label" style="margin-top:2px">of ${gp}g</div><div class="bar"><div class="bar-fill" style="width:${Math.min(100,Math.round(tp/gp*100))}%;background:${pc}"></div></div></div>`;
-  let nc=net<=gk?'#1D9E75':'#E24B4A';
+  let nc=net<=0?'#1D9E75':'#E24B4A';
   document.getElementById('net-card').innerHTML=`<div><div class="net-label">Net kcal (eaten − burnt)</div></div><div class="net-val" style="color:${nc}">${Math.round(net)} kcal</div>`;
   let mc='';
   MEALS.forEach(m=>{
@@ -501,7 +503,7 @@ function renderHistory(){
   let kburn=days.map(dt=>{let day=d.days[dt];if(!day)return 0;return Math.round((day.activities||[]).reduce((s,a)=>s+a.kcal,0))});
   let prot=days.map(dt=>{let day=d.days[dt];if(!day)return 0;let t=0;MEALS.forEach(m=>(day.meals[m]||[]).forEach(e=>t+=e.prot));return Math.round(t)});
   if(_hChart){_hChart.destroy();_hChart=null;}
-  _hChart=new Chart(document.getElementById('histChart'),{type:'bar',data:{labels,datasets:[{label:'Kcal in',data:kin,backgroundColor:'#1D9E75',borderRadius:3},{label:'Kcal burnt',data:kburn,backgroundColor:'#E24B4A',borderRadius:3},{label:'Protein g',data:prot,backgroundColor:'#185FA5',borderRadius:3}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{ticks:{font:{size:10}}},y:{ticks:{font:{size:10}}}}}});
+  _hChart=new Chart(document.getElementById('histChart'),{type:'bar',data:{labels,datasets:[{label:'Kcal in',data:kin,backgroundColor:'#E24B4A',borderRadius:3},{label:'Kcal burnt',data:kburn,backgroundColor:'#1D9E75',borderRadius:3},{label:'Protein g',data:prot,backgroundColor:'#185FA5',borderRadius:3}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{ticks:{font:{size:10}}},y:{ticks:{font:{size:10}}}}}});
   let html='';
   days.slice().reverse().forEach(dt=>{
     let day=d.days[dt],k=0,p=0,b=0;
@@ -510,7 +512,7 @@ function renderHistory(){
     let pk=d.goals.kcal?Math.min(100,Math.round(k/d.goals.kcal*100)):0;
     let pp=d.goals.prot?Math.min(100,Math.round(p/d.goals.prot*100)):0;
     let pb=d.goals.kcal?Math.min(100,Math.round(b/d.goals.kcal*100)):0;
-    html+=`<div class="hist-day"><div class="hist-day-head"><span class="hist-date">${lbl}</span><span class="hist-tag ${k>0?'tag-green':'tag-gray'}">${Math.round(k)} kcal</span></div><div class="hbar-row"><span class="hbar-lbl">Kcal</span><div class="hbar-track"><div class="hbar-fill" style="width:${pk}%;background:#1D9E75"></div></div><span class="hbar-val">${Math.round(k)} / ${d.goals.kcal}</span></div><div class="hbar-row"><span class="hbar-lbl">Protein</span><div class="hbar-track"><div class="hbar-fill" style="width:${pp}%;background:#185FA5"></div></div><span class="hbar-val">${Math.round(p)}g / ${d.goals.prot}g</span></div><div class="hbar-row"><span class="hbar-lbl">Burned</span><div class="hbar-track"><div class="hbar-fill" style="width:${pb}%;background:#E24B4A"></div></div><span class="hbar-val">−${Math.round(b)} kcal</span></div></div>`;
+    html+=`<div class="hist-day"><div class="hist-day-head"><span class="hist-date">${lbl}</span><span class="hist-tag ${k>0?'tag-green':'tag-gray'}">${Math.round(k)} kcal</span></div><div class="hbar-row"><span class="hbar-lbl">Kcal</span><div class="hbar-track"><div class="hbar-fill" style="width:${pk}%;background:#E24B4A"></div></div><span class="hbar-val">${Math.round(k)} / ${d.goals.kcal}</span></div><div class="hbar-row"><span class="hbar-lbl">Protein</span><div class="hbar-track"><div class="hbar-fill" style="width:${pp}%;background:#185FA5"></div></div><span class="hbar-val">${Math.round(p)}g / ${d.goals.prot}g</span></div><div class="hbar-row"><span class="hbar-lbl">Burned</span><div class="hbar-track"><div class="hbar-fill" style="width:${pb}%;background:#1D9E75"></div></div><span class="hbar-val">−${Math.round(b)} kcal</span></div></div>`;
   });
   // Averages
   let daysWithData=days.filter(dt=>kin[days.indexOf(dt)]>0||kburn[days.indexOf(dt)]>0||prot[days.indexOf(dt)]>0);
@@ -936,6 +938,33 @@ function bgClose(e,id){if(e.target===document.getElementById(id))closeModal(id)}
 
 updateDateDisplay();
 renderToday();
+
+// Swipe gesture for tab navigation
+(function(){
+  const PAGES=['today','history','foods'];
+  let startX=0,startY=0;
+  let pagesEl=document.getElementById('app');
+  pagesEl.addEventListener('touchstart',function(e){
+    startX=e.touches[0].clientX;
+    startY=e.touches[0].clientY;
+  },{passive:true});
+  pagesEl.addEventListener('touchend',function(e){
+    // Don't swipe if inside a modal
+    if(document.querySelector('.modal-bg.open'))return;
+    let dx=e.changedTouches[0].clientX-startX;
+    let dy=e.changedTouches[0].clientY-startY;
+    // Only horizontal swipes (dx > dy*2 and dx > 50px threshold)
+    if(Math.abs(dx)<60||Math.abs(dx)<Math.abs(dy)*1.5)return;
+    let active=document.querySelector('.page.active');
+    if(!active)return;
+    let cur=PAGES.indexOf(active.id.replace('page-',''));
+    if(cur===-1)return;
+    let next=dx<0?Math.min(cur+1,PAGES.length-1):Math.max(cur-1,0);
+    if(next===cur)return;
+    let btn=document.querySelectorAll('.nav-btn')[next];
+    showPage(PAGES[next],btn);
+  },{passive:true});
+})();
 
 // Detect keyboard open — add kb-open class to modal so buttons shift up above Chrome bar
 if(window.visualViewport){
