@@ -296,6 +296,18 @@ v13.8
   - Chart threshold lines (2000 kcal red, 2500 kcal green) noted for
     next version
 
+
+v13.9
+  - Chart threshold lines added: dashed dark red line at 2000 kcal (max
+    intake target), dashed dark green line at 2500 kcal (min burn target).
+    Both values highlighted in matching colours on left axis.
+  - Weight and waist axis scales hidden — lines and dots only, no labels.
+    Weight axis range: 75-90 kg. Waist axis range: 80-100 cm.
+    Both scaled so changes are clearly visible without crowding the chart.
+  - Weight and waist lines made thinner (width 1 instead of 2).
+  - Legend condensed to single line: smaller font, shorter labels
+    (Eaten, Burnt, Protein, Weight, Waist, 2000, 2500), no wrapping.
+
 ================================================================================
 END OF README
 ================================================================================
