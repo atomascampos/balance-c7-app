@@ -1,4 +1,4 @@
-const CACHE = 'balance-v13.5';
+const CACHE = 'balance-v13.7';
 const ASSETS = ['./index.html', './manifest.json', './icon-192.png'];
 
 self.addEventListener('install', e => {

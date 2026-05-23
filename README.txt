@@ -256,6 +256,29 @@ v13.5
     meal logging, activity, add food, edit food, settings
   - Cancel/Save/Add buttons now always visible above keyboard in every modal
 
+
+v13.6
+  - Timezone fix: new day rolls over at midnight London/Lisbon time
+    (Europe/London timezone used throughout)
+  - Protein card colour logic updated: amber below 80%, blue 80-100%,
+    green when protein goal exceeded
+  - Daily breakdown order fixed: Kcal eaten (red), Kcal burnt (green),
+    Protein (blue) — in that order for every day in History tab
+  - "Burned" corrected to "Burnt" in daily breakdown
+  - Add food (Foods tab): input auto-focuses when modal opens so
+    keyboard stays up immediately
+  - Food search list height constrained so bottom anchor ("Not listed?
+    / Add it / Cancel") always visible above keyboard
+
+
+v13.7
+  - History chart upgraded to dual axis: left axis = kcal (red/green bars),
+    right axis = protein (blue bars, labelled in grams). Protein scale set so
+    200g aligns visually with 3500 kcal, making the blue bar clearly readable.
+  - Daily breakdown: date tag now shows net balance (consumed minus burnt)
+    instead of raw kcal eaten. Green tag (deficit) if burnt >= eaten,
+    red tag (surplus) if eaten > burnt. "No data" tag for empty days.
+
 ================================================================================
 END OF README
 ================================================================================
