@@ -279,6 +279,23 @@ v13.7
     instead of raw kcal eaten. Green tag (deficit) if burnt >= eaten,
     red tag (surplus) if eaten > burnt. "No data" tag for empty days.
 
+
+v13.8
+  - Two measurement logging buttons added at bottom of History tab:
+    "Stomach perimeter" (cm) and "Weight" (kg)
+  - Tapping either opens a modal with a value input and a date picker
+    (defaults to today, scroll back to any past date)
+  - Shows last 3 readings for context before saving
+  - Measurements saved independently per date; re-logging same date
+    overwrites previous entry
+  - History chart updated: weight (dark yellow line) and waist (purple
+    line) appear as overlays when data exists, with dot markers and
+    tooltip labels. Lines only shown when at least one reading exists
+    in the 7-day window.
+  - Legend updated to include weight and waist indicators
+  - Chart threshold lines (2000 kcal red, 2500 kcal green) noted for
+    next version
+
 ================================================================================
 END OF README
 ================================================================================
